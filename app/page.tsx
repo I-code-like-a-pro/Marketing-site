@@ -107,24 +107,32 @@ interface NavbarProps {
  
 // ─── Custom Hooks ─────────────────────────────────────────────────────────────
  
-function useInView(threshold = 0.15): [React.RefObject<HTMLDivElement>, boolean] {
-  const ref = useRef<HTMLDivElement>(null);
+function useInView(
+  threshold = 0.15
+): [React.RefObject<HTMLDivElement | null>, boolean] {
+  const ref = useRef<HTMLDivElement | null>(null);
   const [inView, setInView] = useState(false);
- 
+
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+
     const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setInView(true); },
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+        }
+      },
       { threshold }
     );
+
     obs.observe(el);
+
     return () => obs.disconnect();
   }, [threshold]);
- 
+
   return [ref, inView];
 }
- 
 function useScrollY(): number {
   const [y, setY] = useState(0);
   useEffect(() => {
@@ -809,7 +817,7 @@ const Footer: FC = () => (
  
 // ─── Root ─────────────────────────────────────────────────────────────────────
  
-export default function App(): JSX.Element {
+export default function App(){
   const scrollY = useScrollY();
  
   return (
