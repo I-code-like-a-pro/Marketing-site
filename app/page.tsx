@@ -1,8 +1,8 @@
-"use client"
+"use client";
 import { useState, useEffect, useRef, ReactNode, CSSProperties, FC } from "react";
- 
+
 // ─── Design Tokens ────────────────────────────────────────────────────────────
- 
+
 const PALETTE = {
   obsidian:     "#0A0A0F",
   ink:          "#12121A",
@@ -23,49 +23,49 @@ const PALETTE = {
   rose:         "#FF5E7D",
   roseMuted:    "#3A0F1A",
 } as const;
- 
+
 type PaletteColor = (typeof PALETTE)[keyof typeof PALETTE];
- 
+
 // ─── Types ────────────────────────────────────────────────────────────────────
- 
+
 interface RevealProps {
   children: ReactNode;
   delay?: number;
   dir?: "up" | "left" | "right";
   style?: CSSProperties;
 }
- 
+
 interface BadgeProps {
   children: ReactNode;
   color?: PaletteColor | string;
 }
- 
+
 interface PhoneMockupProps {
   screen: ReactNode;
 }
- 
+
 interface StatItem {
   num: string;
   label: string;
 }
- 
+
 interface MetricRow {
   label: string;
   val: string;
   color: string;
 }
- 
+
 interface BarDay {
   height: number;
   day: string;
 }
- 
+
 interface GoalItem {
   goal: string;
   pct: number;
   color: string;
 }
- 
+
 interface Feature {
   icon: string;
   title: string;
@@ -74,14 +74,14 @@ interface Feature {
   screen: ReactNode;
   points: string[];
 }
- 
+
 interface Step {
   n: string;
   title: string;
   desc: string;
   icon: string;
 }
- 
+
 interface Plan {
   name: string;
   price: string;
@@ -92,7 +92,7 @@ interface Plan {
   color: string;
   highlighted: boolean;
 }
- 
+
 interface Testimonial {
   name: string;
   role: string;
@@ -100,39 +100,31 @@ interface Testimonial {
   avatar: string;
   color: string;
 }
- 
+
 interface NavbarProps {
   scrollY: number;
 }
- 
+
 // ─── Custom Hooks ─────────────────────────────────────────────────────────────
- 
-function useInView(
-  threshold = 0.15
-): [React.RefObject<HTMLDivElement | null>, boolean] {
+
+function useInView(threshold = 0.15): [React.RefObject<HTMLDivElement | null>, boolean] {
   const ref = useRef<HTMLDivElement | null>(null);
   const [inView, setInView] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-
     const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-        }
-      },
+      ([entry]) => { if (entry.isIntersecting) setInView(true); },
       { threshold }
     );
-
     obs.observe(el);
-
     return () => obs.disconnect();
   }, [threshold]);
 
   return [ref, inView];
 }
+
 function useScrollY(): number {
   const [y, setY] = useState(0);
   useEffect(() => {
@@ -142,16 +134,27 @@ function useScrollY(): number {
   }, []);
   return y;
 }
- 
+
+function useIsMobile(): boolean {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+  return isMobile;
+}
+
 // ─── Shared Components ────────────────────────────────────────────────────────
- 
+
 const Reveal: FC<RevealProps> = ({ children, delay = 0, dir = "up", style = {} }) => {
   const [ref, inView] = useInView();
   const translate =
     dir === "up" ? "translateY(40px)" :
     dir === "left" ? "translateX(-40px)" :
     "translateX(40px)";
- 
+
   return (
     <div
       ref={ref}
@@ -166,7 +169,7 @@ const Reveal: FC<RevealProps> = ({ children, delay = 0, dir = "up", style = {} }
     </div>
   );
 };
- 
+
 const Badge: FC<BadgeProps> = ({ children, color = PALETTE.accent }) => (
   <span style={{
     display: "inline-flex", alignItems: "center", gap: 6,
@@ -180,7 +183,7 @@ const Badge: FC<BadgeProps> = ({ children, color = PALETTE.accent }) => (
     {children}
   </span>
 );
- 
+
 const PhoneMockup: FC<PhoneMockupProps> = ({ screen }) => (
   <div style={{
     width: 230, height: 480,
@@ -201,16 +204,15 @@ const PhoneMockup: FC<PhoneMockupProps> = ({ screen }) => (
     </div>
   </div>
 );
- 
+
 // ─── App Screens ──────────────────────────────────────────────────────────────
- 
+
 const AppScreen1: FC = () => {
   const rows: MetricRow[] = [
     { label: "Focus Time",  val: "3h 24m",    color: PALETTE.accent },
     { label: "Tasks Done",  val: "12 / 18",   color: PALETTE.teal   },
     { label: "Streak",      val: "🔥 14 days", color: PALETTE.gold   },
   ];
- 
   return (
     <div style={{ padding: "0 16px", fontFamily: "inherit" }}>
       <p style={{ color: PALETTE.textMuted, fontSize: 11, marginBottom: 4 }}>Good morning</p>
@@ -237,7 +239,7 @@ const AppScreen1: FC = () => {
     </div>
   );
 };
- 
+
 const AppScreen2: FC = () => {
   const bars: BarDay[] = [
     { height: 0.4, day: "M" }, { height: 0.7, day: "T" },
@@ -245,7 +247,6 @@ const AppScreen2: FC = () => {
     { height: 0.65, day: "F" }, { height: 1.0, day: "S" },
     { height: 0.8, day: "S" },
   ];
- 
   return (
     <div style={{ padding: "0 16px" }}>
       <p style={{ color: PALETTE.textMuted, fontSize: 11 }}>INSIGHTS</p>
@@ -253,10 +254,7 @@ const AppScreen2: FC = () => {
       <div style={{ display: "flex", alignItems: "flex-end", gap: 6, height: 80, marginBottom: 20 }}>
         {bars.map((b, i) => (
           <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-            <div style={{
-              width: "100%", height: b.height * 60, borderRadius: 6,
-              background: i === 5 ? PALETTE.accent : `${PALETTE.accent}44`,
-            }} />
+            <div style={{ width: "100%", height: b.height * 60, borderRadius: 6, background: i === 5 ? PALETTE.accent : `${PALETTE.accent}44` }} />
             <span style={{ fontSize: 8, color: PALETTE.textDim }}>{b.day}</span>
           </div>
         ))}
@@ -268,14 +266,13 @@ const AppScreen2: FC = () => {
     </div>
   );
 };
- 
+
 const AppScreen3: FC = () => {
   const goals: GoalItem[] = [
     { goal: "Launch MVP",  pct: 88, color: PALETTE.accent },
     { goal: "10K users",  pct: 42, color: PALETTE.teal   },
     { goal: "Sleep 8h",   pct: 71, color: PALETTE.gold   },
   ];
- 
   return (
     <div style={{ padding: "0 16px" }}>
       <p style={{ color: PALETTE.textMuted, fontSize: 11 }}>GOALS</p>
@@ -294,17 +291,17 @@ const AppScreen3: FC = () => {
     </div>
   );
 };
- 
+
 // ─── Data ─────────────────────────────────────────────────────────────────────
- 
+
 const NAV_LINKS: string[] = ["Features", "How It Works", "Pricing", "Testimonials"];
- 
+
 const STATS: StatItem[] = [
-  { num: "50K+", label: "Active users"       },
-  { num: "4.9★", label: "App Store rating"   },
-  { num: "#1",   label: "Productivity app"   },
+  { num: "50K+", label: "Active users"     },
+  { num: "4.9★", label: "App Store rating" },
+  { num: "#1",   label: "Productivity app" },
 ];
- 
+
 const FEATURES: Feature[] = [
   {
     icon: "🧠",
@@ -331,14 +328,14 @@ const FEATURES: Feature[] = [
     points: ["OKR-style goal frameworks", "Milestone tracking & celebration", "Habit stacking system"],
   },
 ];
- 
+
 const STEPS: Step[] = [
   { n: "01", title: "Download & Set Up",    desc: "Takes less than 2 minutes. Tell us your goals, your schedule, and your energy patterns.", icon: "📲" },
   { n: "02", title: "Design Your System",   desc: "Flowly builds a personalized productivity architecture based on your unique work style.",   icon: "🏗️" },
   { n: "03", title: "Execute with Clarity", desc: "Every day starts with a clear, focused plan. No decision fatigue. Just flow.",              icon: "⚡" },
   { n: "04", title: "Watch Yourself Grow",  desc: "Track momentum, celebrate streaks, and iterate with real insights — not guesswork.",        icon: "📈" },
 ];
- 
+
 const PLANS: Plan[] = [
   {
     name: "Free", price: "$0", per: "forever",
@@ -359,118 +356,199 @@ const PLANS: Plan[] = [
     cta: "Contact Us", color: PALETTE.teal, highlighted: false,
   },
 ];
- 
+
 const TESTIMONIALS: Testimonial[] = [
-  { name: "Sarah Chen",    role: "Product Designer @ Vercel",        text: "Flowly genuinely changed how I start my day. I used to spend 30 minutes figuring out what to tackle. Now it's just... there. Clear and obvious.",                              avatar: "SC", color: PALETTE.accent     },
-  { name: "Marcus Okafor", role: "Indie Hacker",                     text: "I've tried every productivity app. Flowly is the first one that adapted to me instead of forcing me into a system. The AI suggestions are eerily accurate.",                    avatar: "MO", color: PALETTE.teal       },
-  { name: "Priya Nair",    role: "Engineering Manager @ Stripe",     text: "My team noticed I was shipping faster. Flowly helped me protect deep work time and stop context-switching every 20 minutes.",                                                    avatar: "PN", color: PALETTE.gold       },
-  { name: "James Park",    role: "Freelance Developer",              text: "The streak system is deceptively motivating. 47 days and counting. I don't want to break it.",                                                                                    avatar: "JP", color: PALETTE.rose       },
-  { name: "Lena Möller",   role: "Head of Content @ Linear",        text: "I was skeptical of 'AI scheduling' but Flowly understands that I do creative work better at 10pm. No other app figured that out.",                                                 avatar: "LM", color: PALETTE.accentGlow },
-  { name: "Tariq Hassan",  role: "Startup Founder",                  text: "Between the analytics and goal tracking, Flowly is essentially a co-founder for my personal productivity. Highly recommended.",                                                   avatar: "TH", color: PALETTE.teal       },
+  { name: "Sarah Chen",    role: "Product Designer @ Vercel",    text: "Flowly genuinely changed how I start my day. I used to spend 30 minutes figuring out what to tackle. Now it's just... there. Clear and obvious.",                           avatar: "SC", color: PALETTE.accent     },
+  { name: "Marcus Okafor", role: "Indie Hacker",                 text: "I've tried every productivity app. Flowly is the first one that adapted to me instead of forcing me into a system. The AI suggestions are eerily accurate.",                   avatar: "MO", color: PALETTE.teal       },
+  { name: "Priya Nair",    role: "Engineering Manager @ Stripe", text: "My team noticed I was shipping faster. Flowly helped me protect deep work time and stop context-switching every 20 minutes.",                                                   avatar: "PN", color: PALETTE.gold       },
+  { name: "James Park",    role: "Freelance Developer",          text: "The streak system is deceptively motivating. 47 days and counting. I don't want to break it.",                                                                                   avatar: "JP", color: PALETTE.rose       },
+  { name: "Lena Möller",   role: "Head of Content @ Linear",    text: "I was skeptical of 'AI scheduling' but Flowly understands that I do creative work better at 10pm. No other app figured that out.",                                               avatar: "LM", color: PALETTE.accentGlow },
+  { name: "Tariq Hassan",  role: "Startup Founder",              text: "Between the analytics and goal tracking, Flowly is essentially a co-founder for my personal productivity. Highly recommended.",                                                  avatar: "TH", color: PALETTE.teal       },
 ];
- 
+
 const FOOTER_COLS: Record<string, string[]> = {
   Product: ["Features", "Pricing", "Roadmap", "Changelog"],
   Company: ["About", "Blog", "Careers", "Press"],
   Legal:   ["Privacy Policy", "Terms of Service", "Cookie Policy"],
   Support: ["Help Center", "Contact Us", "Status", "Community"],
 };
- 
+
 const SOCIAL_LINKS: string[] = ["Twitter", "LinkedIn", "Instagram", "Discord"];
 const LOGOS: string[]        = ["Notion","Figma","Linear","Slack","Stripe","Loom","Vercel","Raycast"];
 const PLATFORMS: string[]    = ["App Store", "Google Play"];
- 
+
 // ─── Section Components ───────────────────────────────────────────────────────
- 
+
 const Navbar: FC<NavbarProps> = ({ scrollY }) => {
   const solid = scrollY > 60;
+  const isMobile = useIsMobile();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // Close menu on scroll
+  useEffect(() => { if (menuOpen) setMenuOpen(false); }, [scrollY]);
+
   return (
-    <nav style={{
-      position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-      padding: "0 max(32px, calc(50% - 640px))",
-      height: 72,
-      display: "flex", alignItems: "center", justifyContent: "space-between",
-      background: solid ? `${PALETTE.obsidian}E8` : "transparent",
-      backdropFilter: solid ? "blur(20px)" : "none",
-      borderBottom: solid ? `1px solid ${PALETTE.border}` : "none",
-      transition: "all 0.4s ease",
-    }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <div style={{
-          width: 32, height: 32, borderRadius: 10,
-          background: `linear-gradient(135deg, ${PALETTE.accent}, ${PALETTE.teal})`,
-          display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16,
-        }}>⚡</div>
-        <span style={{ color: PALETTE.text, fontWeight: 800, fontSize: 18, letterSpacing: "-0.02em", fontFamily: "'Clash Display', 'Plus Jakarta Sans', sans-serif" }}>
-          Flowly
-        </span>
-      </div>
- 
-      <div style={{ display: "flex", gap: 36 }}>
-        {NAV_LINKS.map(l => (
-          <a key={l}
-            href={`#${l.toLowerCase().replace(/ /g, "-")}`}
-            style={{ color: PALETTE.textMuted, fontSize: 13, textDecoration: "none", fontWeight: 500, letterSpacing: "0.01em", transition: "color 0.2s" }}
-            onMouseEnter={e => (e.currentTarget.style.color = PALETTE.text)}
-            onMouseLeave={e => (e.currentTarget.style.color = PALETTE.textMuted)}
+    <>
+      <nav style={{
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
+        padding: isMobile ? "0 20px" : "0 max(32px, calc(50% - 640px))",
+        height: 64,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        background: (solid || menuOpen) ? `${PALETTE.obsidian}F0` : "transparent",
+        backdropFilter: (solid || menuOpen) ? "blur(20px)" : "none",
+        borderBottom: (solid || menuOpen) ? `1px solid ${PALETTE.border}` : "none",
+        transition: "all 0.4s ease",
+      }}>
+        {/* Logo */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{
+            width: 32, height: 32, borderRadius: 10,
+            background: `linear-gradient(135deg, ${PALETTE.accent}, ${PALETTE.teal})`,
+            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16,
+          }}>⚡</div>
+          <span style={{ color: PALETTE.text, fontWeight: 800, fontSize: 18, letterSpacing: "-0.02em", fontFamily: "'Clash Display', 'Plus Jakarta Sans', sans-serif" }}>
+            Flowly
+          </span>
+        </div>
+
+        {/* Desktop nav */}
+        {!isMobile && (
+          <div style={{ display: "flex", gap: 36 }}>
+            {NAV_LINKS.map(l => (
+              <a key={l}
+                href={`#${l.toLowerCase().replace(/ /g, "-")}`}
+                style={{ color: PALETTE.textMuted, fontSize: 13, textDecoration: "none", fontWeight: 500, letterSpacing: "0.01em", transition: "color 0.2s" }}
+                onMouseEnter={e => (e.currentTarget.style.color = PALETTE.text)}
+                onMouseLeave={e => (e.currentTarget.style.color = PALETTE.textMuted)}
+              >
+                {l}
+              </a>
+            ))}
+          </div>
+        )}
+
+        {/* Desktop CTA / Mobile hamburger */}
+        {!isMobile ? (
+          <button
+            style={{
+              padding: "10px 24px", borderRadius: 100,
+              background: PALETTE.accent, color: "#fff",
+              border: "none", cursor: "pointer",
+              fontSize: 13, fontWeight: 700, letterSpacing: "0.02em",
+              boxShadow: `0 0 24px ${PALETTE.accent}55`, transition: "all 0.2s",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = PALETTE.accentGlow; e.currentTarget.style.transform = "translateY(-1px)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = PALETTE.accent;     e.currentTarget.style.transform = "none"; }}
           >
-            {l}
-          </a>
-        ))}
-      </div>
- 
-      <button
-        style={{
-          padding: "10px 24px", borderRadius: 100,
-          background: PALETTE.accent, color: "#fff",
-          border: "none", cursor: "pointer",
-          fontSize: 13, fontWeight: 700, letterSpacing: "0.02em",
-          boxShadow: `0 0 24px ${PALETTE.accent}55`, transition: "all 0.2s",
-        }}
-        onMouseEnter={e => { e.currentTarget.style.background = PALETTE.accentGlow; e.currentTarget.style.transform = "translateY(-1px)"; }}
-        onMouseLeave={e => { e.currentTarget.style.background = PALETTE.accent;     e.currentTarget.style.transform = "none"; }}
-      >
-        Get Early Access
-      </button>
-    </nav>
+            Get Early Access
+          </button>
+        ) : (
+          <button
+            onClick={() => setMenuOpen(o => !o)}
+            style={{ background: "none", border: "none", cursor: "pointer", padding: 8, display: "flex", flexDirection: "column", gap: 5 }}
+            aria-label="Toggle menu"
+          >
+            {[0, 1, 2].map(i => (
+              <span key={i} style={{
+                display: "block", width: 22, height: 2, borderRadius: 1,
+                background: PALETTE.text,
+                transition: "all 0.3s",
+                transform: menuOpen
+                  ? i === 0 ? "translateY(7px) rotate(45deg)"
+                  : i === 2 ? "translateY(-7px) rotate(-45deg)"
+                  : "scaleX(0)"
+                  : "none",
+                opacity: menuOpen && i === 1 ? 0 : 1,
+              }} />
+            ))}
+          </button>
+        )}
+      </nav>
+
+      {/* Mobile dropdown menu */}
+      {isMobile && (
+        <div style={{
+          position: "fixed", top: 64, left: 0, right: 0, zIndex: 99,
+          background: `${PALETTE.obsidian}F8`,
+          backdropFilter: "blur(20px)",
+          borderBottom: `1px solid ${PALETTE.border}`,
+          padding: menuOpen ? "24px 20px 28px" : "0 20px",
+          maxHeight: menuOpen ? 400 : 0,
+          overflow: "hidden",
+          transition: "max-height 0.4s ease, padding 0.4s ease",
+        }}>
+          {NAV_LINKS.map(l => (
+            <a key={l}
+              href={`#${l.toLowerCase().replace(/ /g, "-")}`}
+              onClick={() => setMenuOpen(false)}
+              style={{ display: "block", color: PALETTE.textMuted, fontSize: 18, textDecoration: "none", fontWeight: 600, padding: "12px 0", borderBottom: `1px solid ${PALETTE.border}` }}
+            >
+              {l}
+            </a>
+          ))}
+          <button
+            style={{
+              marginTop: 20, width: "100%", padding: "14px", borderRadius: 100,
+              background: PALETTE.accent, color: "#fff",
+              border: "none", cursor: "pointer",
+              fontSize: 15, fontWeight: 700,
+              boxShadow: `0 0 24px ${PALETTE.accent}55`,
+            }}
+          >
+            Get Early Access
+          </button>
+        </div>
+      )}
+    </>
   );
 };
- 
+
 const HeroSection: FC = () => {
   const [mounted, setMounted]           = useState(false);
   const [activeScreen, setActiveScreen] = useState(0);
- 
+  const isMobile = useIsMobile();
+
   const screens: ReactNode[] = [<AppScreen1 />, <AppScreen2 />, <AppScreen3 />];
- 
+
   useEffect(() => {
     setMounted(true);
     const id = setInterval(() => setActiveScreen(s => (s + 1) % 3), 3000);
     return () => clearInterval(id);
   }, []);
- 
+
   return (
     <section style={{
       minHeight: "100vh", background: PALETTE.obsidian,
       display: "flex", alignItems: "center",
-      padding: "120px max(32px, calc(50% - 640px)) 80px",
+      padding: isMobile
+        ? "100px 20px 60px"
+        : "120px max(32px, calc(50% - 640px)) 80px",
       position: "relative", overflow: "hidden",
     }}>
       {/* Background orbs */}
-      <div style={{ position: "absolute", top: "10%", left: "5%", width: 500, height: 500, borderRadius: "50%", background: `radial-gradient(circle, ${PALETTE.accent}22 0%, transparent 70%)`, pointerEvents: "none" }} />
-      <div style={{ position: "absolute", bottom: "10%", right: "5%", width: 400, height: 400, borderRadius: "50%", background: `radial-gradient(circle, ${PALETTE.teal}18 0%, transparent 70%)`, pointerEvents: "none" }} />
-      {/* Subtle grid */}
+      <div style={{ position: "absolute", top: "10%", left: "5%", width: isMobile ? 280 : 500, height: isMobile ? 280 : 500, borderRadius: "50%", background: `radial-gradient(circle, ${PALETTE.accent}22 0%, transparent 70%)`, pointerEvents: "none" }} />
+      <div style={{ position: "absolute", bottom: "10%", right: "5%", width: isMobile ? 220 : 400, height: isMobile ? 220 : 400, borderRadius: "50%", background: `radial-gradient(circle, ${PALETTE.teal}18 0%, transparent 70%)`, pointerEvents: "none" }} />
+      {/* Grid */}
       <div style={{ position: "absolute", inset: 0, backgroundImage: `linear-gradient(${PALETTE.border}22 1px, transparent 1px), linear-gradient(90deg, ${PALETTE.border}22 1px, transparent 1px)`, backgroundSize: "60px 60px", pointerEvents: "none" }} />
- 
-      <div style={{ display: "flex", alignItems: "center", gap: 80, width: "100%", position: "relative", zIndex: 1 }}>
+
+      <div style={{
+        display: "flex",
+        flexDirection: isMobile ? "column" : "row",
+        alignItems: "center",
+        gap: isMobile ? 48 : 80,
+        width: "100%",
+        position: "relative", zIndex: 1,
+      }}>
         {/* Left copy */}
-        <div style={{ flex: 1, maxWidth: 560 }}>
+        <div style={{ flex: 1, maxWidth: isMobile ? "100%" : 560, textAlign: isMobile ? "center" : "left" }}>
           <div style={{ marginBottom: 24, opacity: mounted ? 1 : 0, transition: "opacity 0.6s 0.1s" }}>
             <Badge color={PALETTE.teal}>🚀 Now in Beta — Join 12,000+ early users</Badge>
           </div>
- 
+
           <h1 style={{
             fontFamily: "'Clash Display', 'Plus Jakarta Sans', sans-serif",
-            fontSize: "clamp(44px, 5.5vw, 72px)", fontWeight: 800,
+            fontSize: isMobile ? "clamp(40px, 11vw, 56px)" : "clamp(44px, 5.5vw, 72px)",
+            fontWeight: 800,
             color: PALETTE.text, lineHeight: 1.05, letterSpacing: "-0.03em",
             margin: "0 0 24px",
             opacity: mounted ? 1 : 0,
@@ -483,49 +561,65 @@ const HeroSection: FC = () => {
             </span>
             <br />stick.
           </h1>
- 
+
           <p style={{
-            color: PALETTE.textMuted, fontSize: 18, lineHeight: 1.7,
-            marginBottom: 40, maxWidth: 460,
+            color: PALETTE.textMuted, fontSize: isMobile ? 16 : 18, lineHeight: 1.7,
+            marginBottom: 40, maxWidth: isMobile ? "100%" : 460,
+            margin: isMobile ? "0 auto 40px" : "0 0 40px",
             opacity: mounted ? 1 : 0,
             transform: mounted ? "none" : "translateY(20px)",
             transition: "opacity 0.7s 0.35s, transform 0.7s 0.35s",
           }}>
             Flowly helps you design your ideal day, track momentum, and reach your goals — with AI-powered insights that actually understand how you work.
           </p>
- 
-          <div style={{ display: "flex", gap: 16, flexWrap: "wrap", opacity: mounted ? 1 : 0, transform: mounted ? "none" : "translateY(20px)", transition: "opacity 0.7s 0.5s, transform 0.7s 0.5s" }}>
+
+          <div style={{
+            display: "flex", gap: 12, flexWrap: "wrap",
+            justifyContent: isMobile ? "center" : "flex-start",
+            opacity: mounted ? 1 : 0, transform: mounted ? "none" : "translateY(20px)",
+            transition: "opacity 0.7s 0.5s, transform 0.7s 0.5s",
+          }}>
             <button
-              style={{ padding: "16px 36px", borderRadius: 100, background: PALETTE.accent, color: "#fff", border: "none", cursor: "pointer", fontSize: 15, fontWeight: 700, boxShadow: `0 0 40px ${PALETTE.accent}55`, transition: "all 0.2s" }}
-              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 0 60px ${PALETTE.accent}88`; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = "none";            e.currentTarget.style.boxShadow = `0 0 40px ${PALETTE.accent}55`; }}
+              style={{ padding: isMobile ? "14px 28px" : "16px 36px", borderRadius: 100, background: PALETTE.accent, color: "#fff", border: "none", cursor: "pointer", fontSize: isMobile ? 14 : 15, fontWeight: 700, boxShadow: `0 0 40px ${PALETTE.accent}55`, transition: "all 0.2s" }}
+              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = "none"; }}
             >
               Download Free →
             </button>
             <button
-              style={{ padding: "16px 36px", borderRadius: 100, background: "transparent", color: PALETTE.text, border: `1px solid ${PALETTE.borderBright}`, cursor: "pointer", fontSize: 15, fontWeight: 600, transition: "all 0.2s" }}
+              style={{ padding: isMobile ? "14px 28px" : "16px 36px", borderRadius: 100, background: "transparent", color: PALETTE.text, border: `1px solid ${PALETTE.borderBright}`, cursor: "pointer", fontSize: isMobile ? 14 : 15, fontWeight: 600, transition: "all 0.2s" }}
               onMouseEnter={e => { e.currentTarget.style.background = PALETTE.surfaceLight; e.currentTarget.style.borderColor = PALETTE.accent; }}
-              onMouseLeave={e => { e.currentTarget.style.background = "transparent";        e.currentTarget.style.borderColor = PALETTE.borderBright; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = PALETTE.borderBright; }}
             >
               ▶ Watch Demo
             </button>
           </div>
- 
-          <div style={{ display: "flex", gap: 32, marginTop: 48, opacity: mounted ? 1 : 0, transition: "opacity 0.7s 0.65s" }}>
+
+          <div style={{
+            display: "flex", gap: isMobile ? 24 : 32, marginTop: 48,
+            justifyContent: isMobile ? "center" : "flex-start",
+            opacity: mounted ? 1 : 0, transition: "opacity 0.7s 0.65s",
+          }}>
             {STATS.map(({ num, label }) => (
-              <div key={label}>
-                <p style={{ color: PALETTE.text, fontSize: 22, fontWeight: 800, margin: 0, letterSpacing: "-0.02em" }}>{num}</p>
+              <div key={label} style={{ textAlign: isMobile ? "center" : "left" }}>
+                <p style={{ color: PALETTE.text, fontSize: isMobile ? 18 : 22, fontWeight: 800, margin: 0, letterSpacing: "-0.02em" }}>{num}</p>
                 <p style={{ color: PALETTE.textMuted, fontSize: 12, margin: "2px 0 0" }}>{label}</p>
               </div>
             ))}
           </div>
         </div>
- 
+
         {/* Phone mockup */}
-        <div style={{ position: "relative", flexShrink: 0, opacity: mounted ? 1 : 0, transform: mounted ? "none" : "translateY(30px)", transition: "opacity 0.9s 0.4s, transform 0.9s 0.4s" }}>
+        <div style={{
+          position: "relative", flexShrink: 0,
+          opacity: mounted ? 1 : 0,
+          transform: mounted ? "none" : "translateY(30px)",
+          transition: "opacity 0.9s 0.4s, transform 0.9s 0.4s",
+          display: "flex", flexDirection: "column", alignItems: "center",
+        }}>
           <div style={{ position: "absolute", inset: -40, background: `radial-gradient(circle, ${PALETTE.accent}30 0%, transparent 70%)`, pointerEvents: "none" }} />
           <PhoneMockup screen={screens[activeScreen]} />
- 
+
           <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 16 }}>
             {[0, 1, 2].map(i => (
               <div
@@ -535,24 +629,28 @@ const HeroSection: FC = () => {
               />
             ))}
           </div>
- 
-          {/* Floating cards */}
-          <div style={{ position: "absolute", top: 60, right: -120, background: PALETTE.surface, borderRadius: 16, padding: "12px 16px", border: `1px solid ${PALETTE.border}`, boxShadow: "0 20px 40px rgba(0,0,0,0.4)", minWidth: 160, animation: "float 3s ease-in-out infinite" }}>
-            <p style={{ color: PALETTE.textMuted, fontSize: 10, margin: 0 }}>STREAK</p>
-            <p style={{ color: PALETTE.gold, fontSize: 16, fontWeight: 700, margin: "2px 0 0" }}>🔥 14 days</p>
-          </div>
-          <div style={{ position: "absolute", bottom: 100, left: -130, background: PALETTE.surface, borderRadius: 16, padding: "12px 16px", border: `1px solid ${PALETTE.tealMuted}`, boxShadow: "0 20px 40px rgba(0,0,0,0.4)", minWidth: 150, animation: "float 3.5s ease-in-out infinite 0.5s" }}>
-            <p style={{ color: PALETTE.textMuted, fontSize: 10, margin: 0 }}>THIS WEEK</p>
-            <p style={{ color: PALETTE.teal, fontSize: 14, fontWeight: 700, margin: "2px 0 0" }}>+23% productivity</p>
-          </div>
+
+          {/* Floating cards — hide on mobile to avoid overflow */}
+          {!isMobile && (
+            <>
+              <div style={{ position: "absolute", top: 60, right: -120, background: PALETTE.surface, borderRadius: 16, padding: "12px 16px", border: `1px solid ${PALETTE.border}`, boxShadow: "0 20px 40px rgba(0,0,0,0.4)", minWidth: 160, animation: "float 3s ease-in-out infinite" }}>
+                <p style={{ color: PALETTE.textMuted, fontSize: 10, margin: 0 }}>STREAK</p>
+                <p style={{ color: PALETTE.gold, fontSize: 16, fontWeight: 700, margin: "2px 0 0" }}>🔥 14 days</p>
+              </div>
+              <div style={{ position: "absolute", bottom: 100, left: -130, background: PALETTE.surface, borderRadius: 16, padding: "12px 16px", border: `1px solid ${PALETTE.tealMuted}`, boxShadow: "0 20px 40px rgba(0,0,0,0.4)", minWidth: 150, animation: "float 3.5s ease-in-out infinite 0.5s" }}>
+                <p style={{ color: PALETTE.textMuted, fontSize: 10, margin: 0 }}>THIS WEEK</p>
+                <p style={{ color: PALETTE.teal, fontSize: 14, fontWeight: 700, margin: "2px 0 0" }}>+23% productivity</p>
+              </div>
+            </>
+          )}
         </div>
       </div>
- 
+
       <style>{`@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }`}</style>
     </section>
   );
 };
- 
+
 const LogoStrip: FC = () => (
   <div style={{ background: PALETTE.ink, borderTop: `1px solid ${PALETTE.border}`, borderBottom: `1px solid ${PALETTE.border}`, padding: "28px 0", overflow: "hidden" }}>
     <p style={{ textAlign: "center", color: PALETTE.textDim, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 20, fontFamily: "'DM Mono', monospace" }}>Trusted by teams at</p>
@@ -564,37 +662,44 @@ const LogoStrip: FC = () => (
     <style>{`@keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }`}</style>
   </div>
 );
- 
+
 const FeaturesSection: FC = () => {
   const [active, setActive] = useState(0);
+  const isMobile = useIsMobile();
+
   return (
-    <section id="features" style={{ background: PALETTE.obsidian, padding: "120px max(32px, calc(50% - 640px))" }}>
+    <section id="features" style={{ background: PALETTE.obsidian, padding: isMobile ? "80px 20px" : "120px max(32px, calc(50% - 640px))" }}>
       <Reveal>
-        <div style={{ textAlign: "center", marginBottom: 80 }}>
+        <div style={{ textAlign: "center", marginBottom: isMobile ? 48 : 80 }}>
           <Badge color={PALETTE.accent}>Features</Badge>
-          <h2 style={{ fontFamily: "'Clash Display', 'Plus Jakarta Sans', sans-serif", fontSize: "clamp(36px, 4vw, 56px)", fontWeight: 800, color: PALETTE.text, letterSpacing: "-0.03em", lineHeight: 1.1, margin: "20px 0 16px" }}>
+          <h2 style={{ fontFamily: "'Clash Display', 'Plus Jakarta Sans', sans-serif", fontSize: isMobile ? "clamp(32px, 8vw, 44px)" : "clamp(36px, 4vw, 56px)", fontWeight: 800, color: PALETTE.text, letterSpacing: "-0.03em", lineHeight: 1.1, margin: "20px 0 16px" }}>
             Everything you need<br /><span style={{ color: PALETTE.textMuted }}>to do your best work</span>
           </h2>
-          <p style={{ color: PALETTE.textMuted, fontSize: 18, maxWidth: 480, margin: "0 auto" }}>Designed for how humans actually work — not how productivity gurus think we should.</p>
+          <p style={{ color: PALETTE.textMuted, fontSize: isMobile ? 15 : 18, maxWidth: 480, margin: "0 auto" }}>Designed for how humans actually work — not how productivity gurus think we should.</p>
         </div>
       </Reveal>
- 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "center" }}>
+
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? 32 : 80, alignItems: "start" }}>
         <div>
           {FEATURES.map((f, i) => (
             <Reveal key={f.title} delay={i * 0.1}>
               <div
                 onClick={() => setActive(i)}
-                style={{ padding: "28px 32px", borderRadius: 20, marginBottom: 16, background: active === i ? PALETTE.surface : "transparent", border: `1px solid ${active === i ? f.color + "55" : PALETTE.border}`, cursor: "pointer", transition: "all 0.3s", borderLeft: active === i ? `3px solid ${f.color}` : `1px solid ${PALETTE.border}` }}
-                onMouseEnter={e => { if (active !== i) e.currentTarget.style.background = PALETTE.surface + "88"; }}
-                onMouseLeave={e => { if (active !== i) e.currentTarget.style.background = "transparent"; }}
+                style={{
+                  padding: isMobile ? "20px 20px" : "28px 32px",
+                  borderRadius: 20, marginBottom: 16,
+                  background: active === i ? PALETTE.surface : "transparent",
+                  border: `1px solid ${active === i ? f.color + "55" : PALETTE.border}`,
+                  cursor: "pointer", transition: "all 0.3s",
+                  borderLeft: active === i ? `3px solid ${f.color}` : `1px solid ${PALETTE.border}`,
+                }}
               >
-                <div style={{ display: "flex", alignItems: "flex-start", gap: 20 }}>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
                   <div style={{ width: 44, height: 44, borderRadius: 12, flexShrink: 0, background: `${f.color}22`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>
                     {f.icon}
                   </div>
-                  <div>
-                    <h3 style={{ color: PALETTE.text, fontSize: 18, fontWeight: 700, margin: "0 0 6px", letterSpacing: "-0.01em" }}>{f.title}</h3>
+                  <div style={{ flex: 1 }}>
+                    <h3 style={{ color: PALETTE.text, fontSize: isMobile ? 16 : 18, fontWeight: 700, margin: "0 0 6px", letterSpacing: "-0.01em" }}>{f.title}</h3>
                     <p style={{ color: PALETTE.textMuted, fontSize: 14, lineHeight: 1.6, margin: 0 }}>{f.desc}</p>
                     {active === i && (
                       <ul style={{ margin: "16px 0 0", padding: 0, listStyle: "none" }}>
@@ -612,11 +717,12 @@ const FeaturesSection: FC = () => {
             </Reveal>
           ))}
         </div>
- 
-        <Reveal dir="right">
+
+        {/* Phone preview — shown below feature list on mobile */}
+        <Reveal dir={isMobile ? "up" : "right"}>
           <div style={{ display: "flex", justifyContent: "center", position: "relative" }}>
             <div style={{ position: "absolute", inset: -60, background: `radial-gradient(circle, ${FEATURES[active].color}25 0%, transparent 70%)`, pointerEvents: "none", transition: "all 0.5s" }} />
-            <div style={{ transition: "transform 0.4s ease", transform: "scale(1.05)" }}>
+            <div style={{ transition: "transform 0.4s ease", transform: isMobile ? "scale(0.95)" : "scale(1.05)" }}>
               <PhoneMockup screen={FEATURES[active].screen} />
             </div>
           </div>
@@ -625,201 +731,251 @@ const FeaturesSection: FC = () => {
     </section>
   );
 };
- 
-const HowItWorksSection: FC = () => (
-  <section id="how-it-works" style={{ background: PALETTE.ink, padding: "120px max(32px, calc(50% - 640px))", borderTop: `1px solid ${PALETTE.border}` }}>
-    <Reveal>
-      <div style={{ textAlign: "center", marginBottom: 80 }}>
-        <Badge color={PALETTE.teal}>How It Works</Badge>
-        <h2 style={{ fontFamily: "'Clash Display', 'Plus Jakarta Sans', sans-serif", fontSize: "clamp(36px, 4vw, 56px)", fontWeight: 800, color: PALETTE.text, letterSpacing: "-0.03em", lineHeight: 1.1, margin: "20px 0 16px" }}>
-          From chaos to<br />
-          <span style={{ background: `linear-gradient(135deg, ${PALETTE.teal}, ${PALETTE.accent})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-            clarity in 4 steps
-          </span>
-        </h2>
-      </div>
-    </Reveal>
- 
-    <div style={{ position: "relative" }}>
-      <div style={{ position: "absolute", top: 60, left: "50%", transform: "translateX(-50%)", width: 1, height: "calc(100% - 120px)", background: `linear-gradient(${PALETTE.accent}44, ${PALETTE.teal}44)`, zIndex: 0 }} />
-      <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
-        {STEPS.map((s, i) => (
-          <Reveal key={s.n} delay={i * 0.12}>
-            <div style={{ display: "flex", gap: 40, flexDirection: i % 2 === 0 ? "row" : "row-reverse", alignItems: "center", position: "relative", zIndex: 1 }}>
-              <div style={{ flex: 1, textAlign: i % 2 === 0 ? "right" : "left" }}>
-                <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: PALETTE.accent, letterSpacing: "0.1em", display: "block", marginBottom: 8 }}>{s.n}</span>
-                <h3 style={{ color: PALETTE.text, fontSize: 24, fontWeight: 700, margin: "0 0 12px", letterSpacing: "-0.02em" }}>{s.title}</h3>
-                <p style={{ color: PALETTE.textMuted, fontSize: 15, lineHeight: 1.7, margin: 0 }}>{s.desc}</p>
+
+const HowItWorksSection: FC = () => {
+  const isMobile = useIsMobile();
+  return (
+    <section id="how-it-works" style={{ background: PALETTE.ink, padding: isMobile ? "80px 20px" : "120px max(32px, calc(50% - 640px))", borderTop: `1px solid ${PALETTE.border}` }}>
+      <Reveal>
+        <div style={{ textAlign: "center", marginBottom: isMobile ? 48 : 80 }}>
+          <Badge color={PALETTE.teal}>How It Works</Badge>
+          <h2 style={{ fontFamily: "'Clash Display', 'Plus Jakarta Sans', sans-serif", fontSize: isMobile ? "clamp(32px, 8vw, 44px)" : "clamp(36px, 4vw, 56px)", fontWeight: 800, color: PALETTE.text, letterSpacing: "-0.03em", lineHeight: 1.1, margin: "20px 0 16px" }}>
+            From chaos to<br />
+            <span style={{ background: `linear-gradient(135deg, ${PALETTE.teal}, ${PALETTE.accent})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              clarity in 4 steps
+            </span>
+          </h2>
+        </div>
+      </Reveal>
+
+      {isMobile ? (
+        /* Mobile: vertical stacked cards */
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          {STEPS.map((s, i) => (
+            <Reveal key={s.n} delay={i * 0.1}>
+              <div style={{ background: PALETTE.surface, borderRadius: 20, padding: "24px 20px", border: `1px solid ${PALETTE.border}`, display: "flex", gap: 16, alignItems: "flex-start" }}>
+                <div style={{ width: 52, height: 52, flexShrink: 0, borderRadius: 16, background: PALETTE.obsidian, border: `1px solid ${PALETTE.borderBright}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>
+                  {s.icon}
+                </div>
+                <div>
+                  <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: PALETTE.accent, letterSpacing: "0.1em", display: "block", marginBottom: 4 }}>{s.n}</span>
+                  <h3 style={{ color: PALETTE.text, fontSize: 17, fontWeight: 700, margin: "0 0 8px", letterSpacing: "-0.01em" }}>{s.title}</h3>
+                  <p style={{ color: PALETTE.textMuted, fontSize: 14, lineHeight: 1.6, margin: 0 }}>{s.desc}</p>
+                </div>
               </div>
-              <div style={{ width: 72, height: 72, flexShrink: 0, borderRadius: 24, background: PALETTE.surface, border: `1px solid ${PALETTE.borderBright}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, boxShadow: `0 0 40px ${PALETTE.accent}22` }}>
-                {s.icon}
+            </Reveal>
+          ))}
+        </div>
+      ) : (
+        /* Desktop: alternating timeline */
+        <div style={{ position: "relative" }}>
+          <div style={{ position: "absolute", top: 60, left: "50%", transform: "translateX(-50%)", width: 1, height: "calc(100% - 120px)", background: `linear-gradient(${PALETTE.accent}44, ${PALETTE.teal}44)`, zIndex: 0 }} />
+          <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
+            {STEPS.map((s, i) => (
+              <Reveal key={s.n} delay={i * 0.12}>
+                <div style={{ display: "flex", gap: 40, flexDirection: i % 2 === 0 ? "row" : "row-reverse", alignItems: "center", position: "relative", zIndex: 1 }}>
+                  <div style={{ flex: 1, textAlign: i % 2 === 0 ? "right" : "left" }}>
+                    <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: PALETTE.accent, letterSpacing: "0.1em", display: "block", marginBottom: 8 }}>{s.n}</span>
+                    <h3 style={{ color: PALETTE.text, fontSize: 24, fontWeight: 700, margin: "0 0 12px", letterSpacing: "-0.02em" }}>{s.title}</h3>
+                    <p style={{ color: PALETTE.textMuted, fontSize: 15, lineHeight: 1.7, margin: 0 }}>{s.desc}</p>
+                  </div>
+                  <div style={{ width: 72, height: 72, flexShrink: 0, borderRadius: 24, background: PALETTE.surface, border: `1px solid ${PALETTE.borderBright}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, boxShadow: `0 0 40px ${PALETTE.accent}22` }}>
+                    {s.icon}
+                  </div>
+                  <div style={{ flex: 1 }} />
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      )}
+    </section>
+  );
+};
+
+const PricingSection: FC = () => {
+  const isMobile = useIsMobile();
+  return (
+    <section id="pricing" style={{ background: PALETTE.obsidian, padding: isMobile ? "80px 20px" : "120px max(32px, calc(50% - 640px))", borderTop: `1px solid ${PALETTE.border}` }}>
+      <Reveal>
+        <div style={{ textAlign: "center", marginBottom: isMobile ? 48 : 80 }}>
+          <Badge color={PALETTE.gold}>Pricing</Badge>
+          <h2 style={{ fontFamily: "'Clash Display', 'Plus Jakarta Sans', sans-serif", fontSize: isMobile ? "clamp(32px, 8vw, 44px)" : "clamp(36px, 4vw, 56px)", fontWeight: 800, color: PALETTE.text, letterSpacing: "-0.03em", margin: "20px 0 16px" }}>Simple, honest pricing</h2>
+          <p style={{ color: PALETTE.textMuted, fontSize: isMobile ? 15 : 18 }}>No tricks. No hidden fees. Cancel anytime.</p>
+        </div>
+      </Reveal>
+
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: 20 }}>
+        {PLANS.map((p, i) => (
+          <Reveal key={p.name} delay={isMobile ? 0 : i * 0.1}>
+            <div style={{ background: p.highlighted ? PALETTE.surface : PALETTE.ink, border: `1px solid ${p.highlighted ? p.color + "88" : PALETTE.border}`, borderRadius: 24, padding: isMobile ? 28 : 36, position: "relative", overflow: "hidden", boxShadow: p.highlighted ? `0 0 60px ${p.color}22` : "none" }}>
+              {p.highlighted && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${PALETTE.accent}, ${PALETTE.teal})` }} />}
+              {p.highlighted && <div style={{ position: "absolute", top: 16, right: 16 }}><Badge color={PALETTE.accent}>Most Popular</Badge></div>}
+              <p style={{ color: p.color, fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 12px", fontFamily: "'DM Mono', monospace" }}>{p.name}</p>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 8 }}>
+                <span style={{ fontSize: 48, fontWeight: 800, color: PALETTE.text, letterSpacing: "-0.03em", fontFamily: "'Clash Display', sans-serif" }}>{p.price}</span>
+                <span style={{ color: PALETTE.textMuted, fontSize: 14 }}>/{p.per}</span>
               </div>
-              <div style={{ flex: 1 }} />
+              <p style={{ color: PALETTE.textMuted, fontSize: 14, margin: "0 0 28px" }}>{p.desc}</p>
+              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 32px" }}>
+                {p.features.map(f => (
+                  <li key={f} style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 12, color: PALETTE.textMuted, fontSize: 14 }}>
+                    <span style={{ color: p.color, fontSize: 12 }}>✓</span>{f}
+                  </li>
+                ))}
+              </ul>
+              <button
+                style={{ width: "100%", padding: "14px", borderRadius: 100, background: p.highlighted ? p.color : "transparent", color: p.highlighted ? "#fff" : PALETTE.text, border: `1px solid ${p.highlighted ? p.color : PALETTE.borderBright}`, cursor: "pointer", fontSize: 14, fontWeight: 700, transition: "all 0.2s" }}
+                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = "none"; }}
+              >
+                {p.cta}
+              </button>
             </div>
           </Reveal>
         ))}
       </div>
-    </div>
-  </section>
-);
- 
-const PricingSection: FC = () => (
-  <section id="pricing" style={{ background: PALETTE.obsidian, padding: "120px max(32px, calc(50% - 640px))", borderTop: `1px solid ${PALETTE.border}` }}>
-    <Reveal>
-      <div style={{ textAlign: "center", marginBottom: 80 }}>
-        <Badge color={PALETTE.gold}>Pricing</Badge>
-        <h2 style={{ fontFamily: "'Clash Display', 'Plus Jakarta Sans', sans-serif", fontSize: "clamp(36px, 4vw, 56px)", fontWeight: 800, color: PALETTE.text, letterSpacing: "-0.03em", margin: "20px 0 16px" }}>Simple, honest pricing</h2>
-        <p style={{ color: PALETTE.textMuted, fontSize: 18 }}>No tricks. No hidden fees. Cancel anytime.</p>
-      </div>
-    </Reveal>
- 
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
-      {PLANS.map((p, i) => (
-        <Reveal key={p.name} delay={i * 0.1}>
-          <div style={{ background: p.highlighted ? PALETTE.surface : PALETTE.ink, border: `1px solid ${p.highlighted ? p.color + "88" : PALETTE.border}`, borderRadius: 24, padding: 36, position: "relative", overflow: "hidden", boxShadow: p.highlighted ? `0 0 60px ${p.color}22` : "none", height: "100%", boxSizing: "border-box" }}>
-            {p.highlighted && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${PALETTE.accent}, ${PALETTE.teal})` }} />}
-            {p.highlighted && <div style={{ position: "absolute", top: 16, right: 16 }}><Badge color={PALETTE.accent}>Most Popular</Badge></div>}
-            <p style={{ color: p.color, fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 12px", fontFamily: "'DM Mono', monospace" }}>{p.name}</p>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 8 }}>
-              <span style={{ fontSize: 48, fontWeight: 800, color: PALETTE.text, letterSpacing: "-0.03em", fontFamily: "'Clash Display', sans-serif" }}>{p.price}</span>
-              <span style={{ color: PALETTE.textMuted, fontSize: 14 }}>/{p.per}</span>
-            </div>
-            <p style={{ color: PALETTE.textMuted, fontSize: 14, margin: "0 0 28px" }}>{p.desc}</p>
-            <ul style={{ listStyle: "none", padding: 0, margin: "0 0 32px" }}>
-              {p.features.map(f => (
-                <li key={f} style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 12, color: PALETTE.textMuted, fontSize: 14 }}>
-                  <span style={{ color: p.color, fontSize: 12 }}>✓</span>{f}
-                </li>
-              ))}
-            </ul>
-            <button
-              style={{ width: "100%", padding: "14px", borderRadius: 100, background: p.highlighted ? p.color : "transparent", color: p.highlighted ? "#fff" : PALETTE.text, border: `1px solid ${p.highlighted ? p.color : PALETTE.borderBright}`, cursor: "pointer", fontSize: 14, fontWeight: 700, transition: "all 0.2s" }}
-              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = "none"; }}
+    </section>
+  );
+};
+
+const TestimonialsSection: FC = () => {
+  const isMobile = useIsMobile();
+  return (
+    <section id="testimonials" style={{ background: PALETTE.ink, padding: isMobile ? "80px 20px" : "120px max(32px, calc(50% - 640px))", borderTop: `1px solid ${PALETTE.border}` }}>
+      <Reveal>
+        <div style={{ textAlign: "center", marginBottom: isMobile ? 48 : 80 }}>
+          <Badge color={PALETTE.rose}>Testimonials</Badge>
+          <h2 style={{ fontFamily: "'Clash Display', 'Plus Jakarta Sans', sans-serif", fontSize: isMobile ? "clamp(32px, 8vw, 44px)" : "clamp(36px, 4vw, 56px)", fontWeight: 800, color: PALETTE.text, letterSpacing: "-0.03em", margin: "20px 0" }}>
+            People love<br />their new routine
+          </h2>
+        </div>
+      </Reveal>
+
+      <div style={{ columns: isMobile ? 1 : 3, gap: 20 }}>
+        {TESTIMONIALS.map((t, i) => (
+          <Reveal key={t.name} delay={isMobile ? 0 : i * 0.08}>
+            <div
+              style={{ breakInside: "avoid", marginBottom: 20, background: PALETTE.surface, borderRadius: 20, padding: isMobile ? 20 : 28, border: `1px solid ${PALETTE.border}`, transition: "border-color 0.3s" }}
+              onMouseEnter={e => (e.currentTarget.style.borderColor = t.color + "66")}
+              onMouseLeave={e => (e.currentTarget.style.borderColor = PALETTE.border)}
             >
-              {p.cta}
-            </button>
-          </div>
-        </Reveal>
-      ))}
-    </div>
-  </section>
-);
- 
-const TestimonialsSection: FC = () => (
-  <section id="testimonials" style={{ background: PALETTE.ink, padding: "120px max(32px, calc(50% - 640px))", borderTop: `1px solid ${PALETTE.border}` }}>
-    <Reveal>
-      <div style={{ textAlign: "center", marginBottom: 80 }}>
-        <Badge color={PALETTE.rose}>Testimonials</Badge>
-        <h2 style={{ fontFamily: "'Clash Display', 'Plus Jakarta Sans', sans-serif", fontSize: "clamp(36px, 4vw, 56px)", fontWeight: 800, color: PALETTE.text, letterSpacing: "-0.03em", margin: "20px 0" }}>
-          People love<br />their new routine
-        </h2>
-      </div>
-    </Reveal>
- 
-    <div style={{ columns: 3, gap: 20 }}>
-      {TESTIMONIALS.map((t, i) => (
-        <Reveal key={t.name} delay={i * 0.08}>
-          <div
-            style={{ breakInside: "avoid", marginBottom: 20, background: PALETTE.surface, borderRadius: 20, padding: 28, border: `1px solid ${PALETTE.border}`, transition: "border-color 0.3s" }}
-            onMouseEnter={e => (e.currentTarget.style.borderColor = t.color + "66")}
-            onMouseLeave={e => (e.currentTarget.style.borderColor = PALETTE.border)}
-          >
-            <p style={{ color: PALETTE.text, fontSize: 15, lineHeight: 1.7, margin: "0 0 24px" }}>"{t.text}"</p>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 40, height: 40, borderRadius: "50%", background: `${t.color}33`, display: "flex", alignItems: "center", justifyContent: "center", color: t.color, fontSize: 12, fontWeight: 700 }}>{t.avatar}</div>
-              <div>
-                <p style={{ color: PALETTE.text, fontSize: 13, fontWeight: 700, margin: 0 }}>{t.name}</p>
-                <p style={{ color: PALETTE.textMuted, fontSize: 12, margin: 0 }}>{t.role}</p>
+              <p style={{ color: PALETTE.text, fontSize: isMobile ? 14 : 15, lineHeight: 1.7, margin: "0 0 24px" }}>"{t.text}"</p>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ width: 40, height: 40, borderRadius: "50%", background: `${t.color}33`, display: "flex", alignItems: "center", justifyContent: "center", color: t.color, fontSize: 12, fontWeight: 700, flexShrink: 0 }}>{t.avatar}</div>
+                <div>
+                  <p style={{ color: PALETTE.text, fontSize: 13, fontWeight: 700, margin: 0 }}>{t.name}</p>
+                  <p style={{ color: PALETTE.textMuted, fontSize: 12, margin: 0 }}>{t.role}</p>
+                </div>
               </div>
             </div>
-          </div>
-        </Reveal>
-      ))}
-    </div>
-  </section>
-);
- 
-const CtaSection: FC = () => (
-  <section style={{ background: PALETTE.obsidian, padding: "120px max(32px, calc(50% - 640px))", borderTop: `1px solid ${PALETTE.border}` }}>
-    <Reveal>
-      <div style={{ background: PALETTE.surface, border: `1px solid ${PALETTE.borderBright}`, borderRadius: 32, padding: "80px 60px", textAlign: "center", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: "-40%", left: "50%", transform: "translateX(-50%)", width: 600, height: 400, borderRadius: "50%", background: `radial-gradient(circle, ${PALETTE.accent}20 0%, transparent 70%)`, pointerEvents: "none" }} />
-        <Badge color={PALETTE.gold}>🎉 Launch Offer</Badge>
-        <h2 style={{ fontFamily: "'Clash Display', 'Plus Jakarta Sans', sans-serif", fontSize: "clamp(40px, 4.5vw, 64px)", fontWeight: 800, color: PALETTE.text, letterSpacing: "-0.03em", lineHeight: 1.1, margin: "24px 0 20px" }}>
-          Start your best<br />
-          <span style={{ background: `linear-gradient(135deg, ${PALETTE.accent}, ${PALETTE.teal})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>chapter today.</span>
-        </h2>
-        <p style={{ color: PALETTE.textMuted, fontSize: 18, maxWidth: 440, margin: "0 auto 40px", lineHeight: 1.7 }}>
-          Join 50,000+ people who chose to work smarter. Free forever. No credit card required.
-        </p>
-        <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
-          {PLATFORMS.map(platform => (
-            <button
-              key={platform}
-              style={{ padding: "16px 36px", borderRadius: 100, background: PALETTE.accent, color: "#fff", border: "none", cursor: "pointer", fontSize: 15, fontWeight: 700, boxShadow: `0 0 40px ${PALETTE.accent}44`, transition: "all 0.2s" }}
-              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = "none"; }}
-            >
-              Download on {platform}
-            </button>
-          ))}
-        </div>
-        <p style={{ color: PALETTE.textDim, fontSize: 12, marginTop: 24 }}>iOS 16+ · Android 12+ · Free to use, always</p>
+          </Reveal>
+        ))}
       </div>
-    </Reveal>
-  </section>
-);
- 
-const Footer: FC = () => (
-  <footer style={{ background: PALETTE.ink, borderTop: `1px solid ${PALETTE.border}`, padding: "80px max(32px, calc(50% - 640px)) 40px" }}>
-    <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr", gap: 60, marginBottom: 60 }}>
-      <div>
+    </section>
+  );
+};
+
+const CtaSection: FC = () => {
+  const isMobile = useIsMobile();
+  return (
+    <section style={{ background: PALETTE.obsidian, padding: isMobile ? "60px 20px" : "120px max(32px, calc(50% - 640px))", borderTop: `1px solid ${PALETTE.border}` }}>
+      <Reveal>
+        <div style={{ background: PALETTE.surface, border: `1px solid ${PALETTE.borderBright}`, borderRadius: 32, padding: isMobile ? "48px 24px" : "80px 60px", textAlign: "center", position: "relative", overflow: "hidden" }}>
+          <div style={{ position: "absolute", top: "-40%", left: "50%", transform: "translateX(-50%)", width: 600, height: 400, borderRadius: "50%", background: `radial-gradient(circle, ${PALETTE.accent}20 0%, transparent 70%)`, pointerEvents: "none" }} />
+          <Badge color={PALETTE.gold}>🎉 Launch Offer</Badge>
+          <h2 style={{ fontFamily: "'Clash Display', 'Plus Jakarta Sans', sans-serif", fontSize: isMobile ? "clamp(36px, 9vw, 52px)" : "clamp(40px, 4.5vw, 64px)", fontWeight: 800, color: PALETTE.text, letterSpacing: "-0.03em", lineHeight: 1.1, margin: "24px 0 20px" }}>
+            Start your best<br />
+            <span style={{ background: `linear-gradient(135deg, ${PALETTE.accent}, ${PALETTE.teal})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>chapter today.</span>
+          </h2>
+          <p style={{ color: PALETTE.textMuted, fontSize: isMobile ? 15 : 18, maxWidth: 440, margin: "0 auto 40px", lineHeight: 1.7 }}>
+            Join 50,000+ people who chose to work smarter. Free forever. No credit card required.
+          </p>
+          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+            {PLATFORMS.map(platform => (
+              <button
+                key={platform}
+                style={{ padding: isMobile ? "14px 24px" : "16px 36px", borderRadius: 100, background: PALETTE.accent, color: "#fff", border: "none", cursor: "pointer", fontSize: isMobile ? 14 : 15, fontWeight: 700, boxShadow: `0 0 40px ${PALETTE.accent}44`, transition: "all 0.2s" }}
+                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = "none"; }}
+              >
+                Download on {platform}
+              </button>
+            ))}
+          </div>
+          <p style={{ color: PALETTE.textDim, fontSize: 12, marginTop: 24 }}>iOS 16+ · Android 12+ · Free to use, always</p>
+        </div>
+      </Reveal>
+    </section>
+  );
+};
+
+const Footer: FC = () => {
+  const isMobile = useIsMobile();
+  return (
+    <footer style={{ background: PALETTE.ink, borderTop: `1px solid ${PALETTE.border}`, padding: isMobile ? "60px 20px 32px" : "80px max(32px, calc(50% - 640px)) 40px" }}>
+      {/* Logo + tagline always on top */}
+      <div style={{ marginBottom: 40 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
           <div style={{ width: 32, height: 32, borderRadius: 10, background: `linear-gradient(135deg, ${PALETTE.accent}, ${PALETTE.teal})`, display: "flex", alignItems: "center", justifyContent: "center" }}>⚡</div>
           <span style={{ color: PALETTE.text, fontWeight: 800, fontSize: 18, fontFamily: "'Clash Display', sans-serif" }}>Flowly</span>
         </div>
-        <p style={{ color: PALETTE.textMuted, fontSize: 14, lineHeight: 1.7, maxWidth: 240, margin: 0 }}>The productivity app that works the way you do — not the other way around.</p>
+        <p style={{ color: PALETTE.textMuted, fontSize: 14, lineHeight: 1.7, maxWidth: 260, margin: 0 }}>The productivity app that works the way you do — not the other way around.</p>
       </div>
- 
-      {Object.entries(FOOTER_COLS).map(([section, links]) => (
-        <div key={section}>
-          <p style={{ color: PALETTE.text, fontSize: 13, fontWeight: 700, margin: "0 0 20px", letterSpacing: "0.02em" }}>{section}</p>
-          {links.map(l => (
-            <a key={l} href="#"
-              style={{ display: "block", color: PALETTE.textMuted, fontSize: 13, textDecoration: "none", marginBottom: 12, transition: "color 0.2s" }}
-              onMouseEnter={e => (e.currentTarget.style.color = PALETTE.text)}
-              onMouseLeave={e => (e.currentTarget.style.color = PALETTE.textMuted)}
+
+      {/* Link columns */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4, 1fr)",
+        gap: isMobile ? "32px 20px" : 40,
+        marginBottom: 48,
+      }}>
+        {Object.entries(FOOTER_COLS).map(([section, links]) => (
+          <div key={section}>
+            <p style={{ color: PALETTE.text, fontSize: 13, fontWeight: 700, margin: "0 0 16px", letterSpacing: "0.02em" }}>{section}</p>
+            {links.map(l => (
+              <a key={l} href="#"
+                style={{ display: "block", color: PALETTE.textMuted, fontSize: 13, textDecoration: "none", marginBottom: 10, transition: "color 0.2s" }}
+                onMouseEnter={e => (e.currentTarget.style.color = PALETTE.text)}
+                onMouseLeave={e => (e.currentTarget.style.color = PALETTE.textMuted)}
+              >
+                {l}
+              </a>
+            ))}
+          </div>
+        ))}
+      </div>
+
+      <div style={{
+        borderTop: `1px solid ${PALETTE.border}`, paddingTop: 28,
+        display: "flex",
+        flexDirection: isMobile ? "column" : "row",
+        justifyContent: "space-between",
+        alignItems: isMobile ? "flex-start" : "center",
+        gap: isMobile ? 16 : 0,
+      }}>
+        <p style={{ color: PALETTE.textDim, fontSize: 13, margin: 0 }}>© 2025 Flowly Inc. All rights reserved.</p>
+        <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
+          {SOCIAL_LINKS.map(s => (
+            <a key={s} href="#"
+              style={{ color: PALETTE.textDim, fontSize: 13, textDecoration: "none", transition: "color 0.2s" }}
+              onMouseEnter={e => (e.currentTarget.style.color = PALETTE.accent)}
+              onMouseLeave={e => (e.currentTarget.style.color = PALETTE.textDim)}
             >
-              {l}
+              {s}
             </a>
           ))}
         </div>
-      ))}
-    </div>
- 
-    <div style={{ borderTop: `1px solid ${PALETTE.border}`, paddingTop: 32, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-      <p style={{ color: PALETTE.textDim, fontSize: 13, margin: 0 }}>© 2025 Flowly Inc. All rights reserved.</p>
-      <div style={{ display: "flex", gap: 24 }}>
-        {SOCIAL_LINKS.map(s => (
-          <a key={s} href="#"
-            style={{ color: PALETTE.textDim, fontSize: 13, textDecoration: "none", transition: "color 0.2s" }}
-            onMouseEnter={e => (e.currentTarget.style.color = PALETTE.accent)}
-            onMouseLeave={e => (e.currentTarget.style.color = PALETTE.textDim)}
-          >
-            {s}
-          </a>
-        ))}
       </div>
-    </div>
-  </footer>
-);
- 
+    </footer>
+  );
+};
+
 // ─── Root ─────────────────────────────────────────────────────────────────────
- 
-export default function App(){
+
+export default function App() {
   const scrollY = useScrollY();
- 
+
   return (
     <div style={{ fontFamily: "'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif", background: PALETTE.obsidian, minHeight: "100vh", WebkitFontSmoothing: "antialiased" }}>
       <style>{`
@@ -842,4 +998,3 @@ export default function App(){
     </div>
   );
 }
- 
